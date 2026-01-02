@@ -99,25 +99,42 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="input-wrapper password-wrapper">
         <input
             type="password"
-            id="password"
-            name="password"
+            id="confirm_password"
+            name="confirm_password"
             required
             minlength="6"
             autocomplete="new-password"
-            placeholder="Create a password"
+            placeholder="Confirm password"
         >
 
         <button
             type="button"
             class="password-toggle"
-            id="togglePassword"
+            id="toggleConfirmPassword"
+            aria-label="Show or hide password"
         >
-            Show
+            <svg id="eyeIconConfirm" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg id="eyeOffIconConfirm" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20
+                         c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4
+                         c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
         </button>
     </div>
 
     <small class="form-hint">
-        Must be at least 6 characters.
+        Re-enter your password to confirm.
     </small>
 </div>
 
@@ -172,12 +189,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordField.setAttribute('type', type);
             
-            if (type === 'text') {
-                eyeIcon.style.display = 'none';
-                eyeOffIcon.style.display = 'block';
-            } else {
-                eyeIcon.style.display = 'block';
-                eyeOffIcon.style.display = 'none';
+            if (eyeIcon && eyeOffIcon) {
+                if (type === 'text') {
+                    eyeIcon.style.display = 'none';
+                    eyeOffIcon.style.display = 'block';
+                } else {
+                    eyeIcon.style.display = 'block';
+                    eyeOffIcon.style.display = 'none';
+                }
             }
         });
     }
@@ -187,12 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = confirmField.getAttribute('type') === 'password' ? 'text' : 'password';
             confirmField.setAttribute('type', type);
             
-            if (type === 'text') {
-                eyeIconConfirm.style.display = 'none';
-                eyeOffIconConfirm.style.display = 'block';
-            } else {
-                eyeIconConfirm.style.display = 'block';
-                eyeOffIconConfirm.style.display = 'none';
+            if (eyeIconConfirm && eyeOffIconConfirm) {
+                if (type === 'text') {
+                    eyeIconConfirm.style.display = 'none';
+                    eyeOffIconConfirm.style.display = 'block';
+                } else {
+                    eyeIconConfirm.style.display = 'block';
+                    eyeOffIconConfirm.style.display = 'none';
+                }
             }
         });
     }
@@ -200,8 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const password = passwordField.value;
-        const confirm = confirmField.value;
+        const password = passwordField ? passwordField.value : '';
+        const confirm = confirmField ? confirmField.value : '';
+
+        if (!password || !confirm) {
+            showMessage('Please fill in all password fields.', 'error');
+            return;
+        }
 
         if (password !== confirm) {
             showMessage('Passwords do not match.', 'error');
